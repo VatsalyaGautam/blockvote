@@ -1,6 +1,6 @@
-# Election Voting DApp
+# Blockvote
 
-A decentralized voting application built on Conflux Network that allows users to create and participate in elections with secure and transparent voting mechanisms.
+A decentralized voting application built on Sepolia that allows users to create and participate in elections with secure and transparent voting mechanisms.
 
 ## Features
 
@@ -15,7 +15,8 @@ A decentralized voting application built on Conflux Network that allows users to
 
 ## Tech Stack
 
-- **Frontend**: 
+- **Frontend**:
+
   - Next.js 14
   - TypeScript
   - Tailwind CSS
@@ -24,14 +25,13 @@ A decentralized voting application built on Conflux Network that allows users to
 
 - **Smart Contract**:
   - Solidity
-  - Conflux Network
+  - Sepolia N/W
 
 ## Prerequisites
 
 - Node.js (v16 or higher)
 - npm or yarn
-- Conflux Portal or compatible Web3 wallet
-
+- Compatible Web3 wallet
 
 ## Smart Contract Features
 
