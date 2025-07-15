@@ -8,9 +8,8 @@ import { Providers } from "@/components/Providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VotingDApp - Decentralized Voting Platform",
-  description: "Secure, transparent blockchain voting on Conflux eSpace",
-  generator: "v0.dev",
+  title: "BlockVote - Decentralized Voting Platform",
+  description: "Secure, transparent blockchain voting on Sepholia",
 };
 
 export default function RootLayout({
