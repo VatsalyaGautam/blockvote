@@ -7,7 +7,47 @@ import {
   Zap,
 } from "lucide-react";
 
-const features = [
+const colorVariants = {
+  blue: {
+    bg: "bg-gradient-to-br from-blue-600 to-blue-700",
+    shadow: "shadow-blue-500/20",
+    ring: "ring-blue-500/20",
+  },
+  cyan: {
+    bg: "bg-gradient-to-br from-cyan-600 to-cyan-700",
+    shadow: "shadow-cyan-500/20",
+    ring: "ring-cyan-500/20",
+  },
+  indigo: {
+    bg: "bg-gradient-to-br from-indigo-600 to-indigo-700",
+    shadow: "shadow-indigo-500/20",
+    ring: "ring-indigo-500/20",
+  },
+  teal: {
+    bg: "bg-gradient-to-br from-teal-600 to-teal-700",
+    shadow: "shadow-teal-500/20",
+    ring: "ring-teal-500/20",
+  },
+  sky: {
+    bg: "bg-gradient-to-br from-sky-600 to-sky-700",
+    shadow: "shadow-sky-500/20",
+    ring: "ring-sky-500/20",
+  },
+  violet: {
+    bg: "bg-gradient-to-br from-violet-600 to-violet-700",
+    shadow: "shadow-violet-500/20",
+    ring: "ring-violet-500/20",
+  },
+};
+
+type FeatureColor = keyof typeof colorVariants;
+
+const features: {
+  name: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  color: FeatureColor;
+}[] = [
   {
     name: "Wallet Integration",
     description:
@@ -49,39 +89,6 @@ const features = [
   },
 ];
 
-const colorVariants = {
-  blue: {
-    bg: "bg-gradient-to-br from-blue-600 to-blue-700",
-    shadow: "shadow-blue-500/20",
-    ring: "ring-blue-500/20",
-  },
-  cyan: {
-    bg: "bg-gradient-to-br from-cyan-600 to-cyan-700",
-    shadow: "shadow-cyan-500/20",
-    ring: "ring-cyan-500/20",
-  },
-  indigo: {
-    bg: "bg-gradient-to-br from-indigo-600 to-indigo-700",
-    shadow: "shadow-indigo-500/20",
-    ring: "ring-indigo-500/20",
-  },
-  teal: {
-    bg: "bg-gradient-to-br from-teal-600 to-teal-700",
-    shadow: "shadow-teal-500/20",
-    ring: "ring-teal-500/20",
-  },
-  sky: {
-    bg: "bg-gradient-to-br from-sky-600 to-sky-700",
-    shadow: "shadow-sky-500/20",
-    ring: "ring-sky-500/20",
-  },
-  violet: {
-    bg: "bg-gradient-to-br from-violet-600 to-violet-700",
-    shadow: "shadow-violet-500/20",
-    ring: "ring-violet-500/20",
-  },
-};
-
 export function Features() {
   return (
     <section className="py-24 sm:py-32 bg-gradient-to-b from-black via-gray-950 to-black">
@@ -113,7 +120,7 @@ export function Features() {
                     >
                       <feature.icon
                         className="h-6 w-6 text-white"
-                        aria-hidden="true"
+                        aria-hidden={true}
                       />
                     </div>
                     {feature.name}

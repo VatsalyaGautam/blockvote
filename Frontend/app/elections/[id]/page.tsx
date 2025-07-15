@@ -5,7 +5,19 @@ import { useEthers } from "@/lib/EthersProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Users, Clock, AlertCircle, CheckCircle2, XCircle, Shield, Info, UserPlus, Trash2, BarChart } from "lucide-react";
+import {
+  Calendar,
+  Users,
+  Clock,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Shield,
+  Info,
+  UserPlus,
+  Trash2,
+  BarChart,
+} from "lucide-react";
 import { toast } from "sonner";
 import { use } from "react";
 import { Contract, BigNumber } from "ethers";
@@ -41,19 +53,37 @@ interface Election {
 
 // Define the contract interface
 interface VotingContract extends Contract {
-  getElection: (electionId: number) => Promise<[BigNumber, string, string, BigNumber, BigNumber, boolean, BigNumber, string]>;
-  getElectionResults: (electionId: number) => Promise<[BigNumber[], string[], BigNumber[]]>;
+  getElection: (
+    electionId: number
+  ) => Promise<
+    [
+      BigNumber,
+      string,
+      string,
+      BigNumber,
+      BigNumber,
+      boolean,
+      BigNumber,
+      string
+    ]
+  >;
+  getElectionResults: (
+    electionId: number
+  ) => Promise<[BigNumber[], string[], BigNumber[]]>;
   checkVoted: (electionId: number, voter: string) => Promise<boolean>;
   checkWhitelisted: (electionId: number, voter: string) => Promise<boolean>;
   castVote: (electionId: number, candidateId: number) => Promise<any>;
   addToWhitelist: (electionId: number, voters: string[]) => Promise<any>;
   whitelistEnabled: (electionId: number) => Promise<boolean>;
-  getCandidate: (electionId: number, candidateId: number) => Promise<[BigNumber, string, string, BigNumber]>;
+  getCandidate: (
+    electionId: number,
+    candidateId: number
+  ) => Promise<[BigNumber, string, string, BigNumber]>;
 }
 
 // Helper function to convert BigNumber to number
 const toNumber = (value: BigNumber | number): number => {
-  if (typeof value === 'number') return value;
+  if (typeof value === "number") return value;
   return value.toNumber();
 };
 
@@ -61,7 +91,7 @@ const toNumber = (value: BigNumber | number): number => {
 const safeParseInt = (value: string): number => {
   const parsed = parseInt(value);
   if (isNaN(parsed)) {
-    throw new Error('Invalid number format');
+    throw new Error("Invalid number format");
   }
   return parsed;
 };
@@ -75,14 +105,21 @@ function ElectionPageContent({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [isWhitelisted, setIsWhitelisted] = useState(true);
-  const [selectedCandidate, setSelectedCandidate] = useState<number | null>(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<number | null>(
+    null
+  );
   const [isVoting, setIsVoting] = useState(false);
   const [whitelistAddresses, setWhitelistAddresses] = useState<string[]>([]);
-  const [newWhitelistAddress, setNewWhitelistAddress] = useState('');
+  const [newWhitelistAddress, setNewWhitelistAddress] = useState("");
   const [isAddingToWhitelist, setIsAddingToWhitelist] = useState(false);
   const [isLoadingWhitelist, setIsLoadingWhitelist] = useState(false);
-  const [results, setResults] = useState<{ id: number; name: string; votes: number }[]>([]);
-  const [selectedCandidateInfo, setSelectedCandidateInfo] = useState<{ name: string; info: string } | null>(null);
+  const [results, setResults] = useState<
+    { id: number; name: string; votes: number }[]
+  >([]);
+  const [selectedCandidateInfo, setSelectedCandidateInfo] = useState<{
+    name: string;
+    info: string;
+  } | null>(null);
 
   // Add effect to handle initial connection
   useEffect(() => {
@@ -98,31 +135,49 @@ function ElectionPageContent({ id }: { id: string }) {
       try {
         setLoading(true);
         const votingContract = contract as unknown as VotingContract;
-        
+
         // Fetch election details
         const electionData = await votingContract.getElection(Number(id));
-        const [electionId, title, description, startTime, endTime, active, candidateCount, creator] = electionData;
-        
+        const [
+          electionId,
+          title,
+          description,
+          startTime,
+          endTime,
+          active,
+          candidateCount,
+          creator,
+        ] = electionData;
+
         // Fetch candidates with their info
         const candidatesData: Candidate[] = [];
         for (let i = 1; i <= Number(candidateCount); i++) {
-          const [candidateId, name, info, votes] = await votingContract.getCandidate(Number(id), i);
-          console.log('Candidate data:', { id: candidateId.toString(), name, info, votes: votes.toString() }); // Debug log
+          const [candidateId, name, info, votes] =
+            await votingContract.getCandidate(Number(id), i);
+          console.log("Candidate data:", {
+            id: candidateId.toString(),
+            name,
+            info,
+            votes: votes.toString(),
+          }); // Debug log
           candidatesData.push({
             id: Number(candidateId),
             name,
-            info: info || 'No additional information available.',
-            voteCount: Number(votes)
+            info: info || "No additional information available.",
+            voteCount: Number(votes),
           });
         }
 
         // Check if user has voted
         const voted = await votingContract.checkVoted(Number(id), account);
-        console.log('Has voted:', voted); // Debug log
-        
+        console.log("Has voted:", voted); // Debug log
+
         // Check if user is whitelisted
-        const whitelisted = await votingContract.checkWhitelisted(Number(id), account);
-        
+        const whitelisted = await votingContract.checkWhitelisted(
+          Number(id),
+          account
+        );
+
         // Check if user is creator
         const isUserCreator = creator.toLowerCase() === account.toLowerCase();
 
@@ -136,7 +191,7 @@ function ElectionPageContent({ id }: { id: string }) {
           candidateCount: Number(candidateCount),
           creator,
           enableWhitelist: await votingContract.whitelistEnabled(Number(id)),
-          candidates: candidatesData
+          candidates: candidatesData,
         };
 
         setElection(electionObj);
@@ -147,8 +202,8 @@ function ElectionPageContent({ id }: { id: string }) {
         // Fetch election results after setting election data
         await fetchElectionResults();
       } catch (err) {
-        console.error('Error fetching election data:', err);
-        setError('Failed to load election data');
+        console.error("Error fetching election data:", err);
+        setError("Failed to load election data");
       } finally {
         setLoading(false);
       }
@@ -160,37 +215,39 @@ function ElectionPageContent({ id }: { id: string }) {
   // Add a debug log for the election state
   useEffect(() => {
     if (election) {
-      console.log('Election state updated:', election);
+      console.log("Election state updated:", election);
     }
   }, [election]);
 
   // Add a debug log for the error state
   useEffect(() => {
     if (error) {
-      console.log('Error state updated:', error);
+      console.log("Error state updated:", error);
     }
   }, [error]);
 
   // Add function to fetch whitelisted addresses
   const fetchWhitelistedAddresses = async () => {
     if (!contract || !election) return;
-    
+
     try {
       setIsLoadingWhitelist(true);
       const votingContract = contract as unknown as VotingContract;
-      
+
       // Get all whitelisted addresses from events
       const filter = votingContract.filters.VoterWhitelisted(election.id, null);
       const events = await votingContract.queryFilter(filter);
-      
+
       // Extract unique addresses from events
-      const addresses = [...new Set(events.map(event => event.args?.voter.toLowerCase()))];
+      const addresses = [
+        ...new Set(events.map((event) => event.args?.voter.toLowerCase())),
+      ];
       setWhitelistAddresses(addresses);
-      
-      console.log('Fetched whitelisted addresses:', addresses);
+
+      console.log("Fetched whitelisted addresses:", addresses);
     } catch (err) {
-      console.error('Error fetching whitelisted addresses:', err);
-      toast.error('Failed to fetch whitelisted addresses');
+      console.error("Error fetching whitelisted addresses:", err);
+      toast.error("Failed to fetch whitelisted addresses");
     } finally {
       setIsLoadingWhitelist(false);
     }
@@ -214,24 +271,27 @@ function ElectionPageContent({ id }: { id: string }) {
       await tx.wait();
       toast.success("Vote cast successfully!");
       setHasVoted(true);
-      
+
       // Refresh election data while preserving candidate info
       const updatedCandidates = await Promise.all(
         candidates.map(async (candidate) => {
-          const [id, name, info, votes] = await votingContract.getCandidate(election.id, candidate.id);
+          const [id, name, info, votes] = await votingContract.getCandidate(
+            election.id,
+            candidate.id
+          );
           return {
             id: Number(id),
             name,
-            info: info || 'No additional information available.',
-            voteCount: Number(votes)
+            info: info || "No additional information available.",
+            voteCount: Number(votes),
           };
         })
       );
-      
+
       setCandidates(updatedCandidates);
     } catch (err) {
-      console.error('Error voting:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to cast vote');
+      console.error("Error voting:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to cast vote");
     } finally {
       setSelectedCandidate(null);
     }
@@ -243,20 +303,29 @@ function ElectionPageContent({ id }: { id: string }) {
     try {
       setIsAddingToWhitelist(true);
       const votingContract = contract as VotingContract;
-      const tx = await votingContract.addToWhitelist(election.id, [newWhitelistAddress.toLowerCase()]);
-      toast.info("Adding to whitelist... Please confirm the transaction in MetaMask");
+      const tx = await votingContract.addToWhitelist(election.id, [
+        newWhitelistAddress.toLowerCase(),
+      ]);
+      toast.info(
+        "Adding to whitelist... Please confirm the transaction in MetaMask"
+      );
       await tx.wait();
       toast.success("Address added to whitelist successfully!");
       setNewWhitelistAddress("");
-      
+
       // Refresh whitelist status
-      const whitelisted = await votingContract.checkWhitelisted(election.id, newWhitelistAddress);
+      const whitelisted = await votingContract.checkWhitelisted(
+        election.id,
+        newWhitelistAddress
+      );
       if (whitelisted) {
         toast.success("Address is now whitelisted!");
       }
     } catch (err) {
-      console.error('Error adding to whitelist:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to add to whitelist');
+      console.error("Error adding to whitelist:", err);
+      toast.error(
+        err instanceof Error ? err.message : "Failed to add to whitelist"
+      );
     } finally {
       setIsAddingToWhitelist(false);
     }
@@ -269,18 +338,24 @@ function ElectionPageContent({ id }: { id: string }) {
     try {
       setIsAddingToWhitelist(true);
       const votingContract = contract as unknown as VotingContract;
-      const tx = await votingContract.addToWhitelist(election.id, [newWhitelistAddress.toLowerCase()]);
-      toast.info("Adding to whitelist... Please confirm the transaction in MetaMask");
+      const tx = await votingContract.addToWhitelist(election.id, [
+        newWhitelistAddress.toLowerCase(),
+      ]);
+      toast.info(
+        "Adding to whitelist... Please confirm the transaction in MetaMask"
+      );
       await tx.wait();
-      
+
       // Refresh the whitelist addresses
       await fetchWhitelistedAddresses();
-      
+
       setNewWhitelistAddress("");
       toast.success("Address added to whitelist successfully");
     } catch (err) {
-      console.error('Error adding to whitelist:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to add to whitelist');
+      console.error("Error adding to whitelist:", err);
+      toast.error(
+        err instanceof Error ? err.message : "Failed to add to whitelist"
+      );
     } finally {
       setIsAddingToWhitelist(false);
     }
@@ -291,41 +366,48 @@ function ElectionPageContent({ id }: { id: string }) {
     if (!contract || !election) return;
 
     try {
-      console.log('Fetching results for election:', election.id);
+      console.log("Fetching results for election:", election.id);
       const votingContract = contract as unknown as VotingContract;
-      
+
       // First try to get results directly
-      console.log('Calling getElectionResults...');
-      const [ids, names, votes] = await votingContract.getElectionResults(election.id);
-      console.log('Raw results:', { ids, names, votes });
-      
+      console.log("Calling getElectionResults...");
+      const [ids, names, votes] = await votingContract.getElectionResults(
+        election.id
+      );
+      console.log("Raw results:", { ids, names, votes });
+
       const resultsData = ids.map((id: BigNumber, index: number) => ({
         id: id.toNumber(),
         name: names[index],
-        votes: votes[index].toNumber()
+        votes: votes[index].toNumber(),
       }));
-      console.log('Processed results:', resultsData);
+      console.log("Processed results:", resultsData);
 
       // If no results, try getting individual candidate data
       if (resultsData.length === 0) {
-        console.log('No results from getElectionResults, trying individual candidates...');
+        console.log(
+          "No results from getElectionResults, trying individual candidates..."
+        );
         const candidateResults = [];
         for (let i = 1; i <= election.candidateCount; i++) {
-          const [id, name, info, voteCount] = await votingContract.getCandidate(election.id, i);
+          const [id, name, info, voteCount] = await votingContract.getCandidate(
+            election.id,
+            i
+          );
           candidateResults.push({
             id: id.toNumber(),
             name,
-            votes: voteCount.toNumber()
+            votes: voteCount.toNumber(),
           });
         }
-        console.log('Candidate results:', candidateResults);
+        console.log("Candidate results:", candidateResults);
         setResults(candidateResults);
       } else {
         setResults(resultsData);
       }
     } catch (err) {
-      console.error('Error fetching election results:', err);
-      toast.error('Failed to fetch election results');
+      console.error("Error fetching election results:", err);
+      toast.error("Failed to fetch election results");
     }
   };
 
@@ -351,7 +433,9 @@ function ElectionPageContent({ id }: { id: string }) {
           <div className="flex items-center justify-center h-[60vh]">
             <div className="text-center">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
-              <p className="mt-4 text-red-600">Please connect your wallet to view election details</p>
+              <p className="mt-4 text-red-600">
+                Please connect your wallet to view election details
+              </p>
               <Button
                 onClick={connect}
                 disabled={isConnecting}
@@ -373,7 +457,9 @@ function ElectionPageContent({ id }: { id: string }) {
           <div className="flex items-center justify-center h-[60vh]">
             <div className="text-center">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
-              <p className="mt-4 text-red-600">Initializing contract... Please wait</p>
+              <p className="mt-4 text-red-600">
+                Initializing contract... Please wait
+              </p>
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mt-4"></div>
             </div>
           </div>
@@ -389,11 +475,10 @@ function ElectionPageContent({ id }: { id: string }) {
           <div className="flex items-center justify-center h-[60vh]">
             <div className="text-center">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
-              <p className="mt-4 text-red-600">Error: {error || 'Election not found'}</p>
-              <Button
-                onClick={() => window.location.reload()}
-                className="mt-4"
-              >
+              <p className="mt-4 text-red-600">
+                Error: {error || "Election not found"}
+              </p>
+              <Button onClick={() => window.location.reload()} className="mt-4">
                 Try Again
               </Button>
             </div>
@@ -404,25 +489,36 @@ function ElectionPageContent({ id }: { id: string }) {
   }
 
   const now = Math.floor(Date.now() / 1000);
-  const isActive = election.active && election.startTime <= now && election.endTime > now;
-  const status = !election.active ? 'Not Active' :
-                election.startTime > now ? 'Upcoming' :
-                election.endTime <= now ? 'Ended' :
-                'Active';
+  const isActive =
+    election.active && election.startTime <= now && election.endTime > now;
+  const status = !election.active
+    ? "Not Active"
+    : election.startTime > now
+    ? "Upcoming"
+    : election.endTime <= now
+    ? "Ended"
+    : "Active";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-4xl font-bold text-gray-900">{election.title}</h1>
+            <h1 className="text-4xl font-bold text-gray-900">
+              {election.title}
+            </h1>
             <div className="flex items-center gap-2">
-              <Badge variant={
-                !election.active ? "destructive" :
-                election.startTime > now ? "secondary" :
-                election.endTime <= now ? "outline" :
-                "default"
-              }>
+              <Badge
+                variant={
+                  !election.active
+                    ? "destructive"
+                    : election.startTime > now
+                    ? "secondary"
+                    : election.endTime <= now
+                    ? "outline"
+                    : "default"
+                }
+              >
                 {status}
               </Badge>
             </div>
@@ -446,17 +542,23 @@ function ElectionPageContent({ id }: { id: string }) {
                       key={candidate.id}
                       className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                       onClick={() => {
-                        console.log('Selected candidate:', candidate); // Debug log
+                        console.log("Selected candidate:", candidate); // Debug log
                         setSelectedCandidateInfo({
                           name: candidate.name,
-                          info: candidate.info || 'No additional information available.'
+                          info:
+                            candidate.info ||
+                            "No additional information available.",
                         });
                       }}
                     >
                       <div className="flex justify-between items-center">
                         <div className="space-y-1">
-                          <h3 className="font-medium text-lg">{candidate.name}</h3>
-                          <p className="text-sm text-gray-500">{candidate.voteCount} votes</p>
+                          <h3 className="font-medium text-lg">
+                            {candidate.name}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            {candidate.voteCount} votes
+                          </p>
                         </div>
                         <Button
                           type="button"
@@ -467,7 +569,7 @@ function ElectionPageContent({ id }: { id: string }) {
                           disabled={!isActive || hasVoted}
                           className="bg-blue-600 hover:bg-blue-700"
                         >
-                          {hasVoted ? 'Voted' : isActive ? 'Vote' : 'Upcoming'}
+                          {hasVoted ? "Voted" : isActive ? "Vote" : "Upcoming"}
                         </Button>
                       </div>
                     </div>
@@ -509,7 +611,9 @@ function ElectionPageContent({ id }: { id: string }) {
                     <Users className="h-4 w-4 text-green-500" />
                     <div>
                       <p className="text-sm font-medium">Total Candidates</p>
-                      <p className="text-sm text-gray-600">{election.candidates.length}</p>
+                      <p className="text-sm text-gray-600">
+                        {election.candidates.length}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -526,7 +630,7 @@ function ElectionPageContent({ id }: { id: string }) {
                   <div>
                     <p className="text-sm font-medium">Your Vote Status</p>
                     <p className="text-sm text-gray-600">
-                      {hasVoted ? 'You have voted' : 'You have not voted yet'}
+                      {hasVoted ? "You have voted" : "You have not voted yet"}
                     </p>
                   </div>
                 </div>
@@ -535,9 +639,11 @@ function ElectionPageContent({ id }: { id: string }) {
                   <div>
                     <p className="text-sm font-medium">Whitelist Status</p>
                     <p className="text-sm text-gray-600">
-                      {election.enableWhitelist ? 
-                        (isWhitelisted ? 'You are whitelisted' : 'You are not whitelisted') :
-                        'Whitelist is not enabled'}
+                      {election.enableWhitelist
+                        ? isWhitelisted
+                          ? "You are whitelisted"
+                          : "You are not whitelisted"
+                        : "Whitelist is not enabled"}
                     </p>
                   </div>
                 </div>
@@ -555,14 +661,19 @@ function ElectionPageContent({ id }: { id: string }) {
                 <CardContent>
                   <div className="space-y-4 p-4 border border-blue-200 rounded-lg bg-white">
                     <div className="space-y-2">
-                      <Label className="text-lg font-semibold text-blue-900">Add Whitelist Addresses</Label>
+                      <Label className="text-lg font-semibold text-blue-900">
+                        Add Whitelist Addresses
+                      </Label>
                       <p className="text-sm text-blue-700">
-                        Enter Ethereum addresses that will be allowed to vote in this election.
+                        Enter Ethereum addresses that will be allowed to vote in
+                        this election.
                       </p>
                       <div className="flex items-center gap-2">
                         <Input
                           value={newWhitelistAddress}
-                          onChange={(e) => setNewWhitelistAddress(e.target.value)}
+                          onChange={(e) =>
+                            setNewWhitelistAddress(e.target.value)
+                          }
                           placeholder="0x..."
                           className="font-mono"
                         />
@@ -572,7 +683,7 @@ function ElectionPageContent({ id }: { id: string }) {
                           disabled={!newWhitelistAddress || isAddingToWhitelist}
                           className="bg-blue-600 hover:bg-blue-700"
                         >
-                          {isAddingToWhitelist ? 'Adding...' : 'Add Address'}
+                          {isAddingToWhitelist ? "Adding..." : "Add Address"}
                         </Button>
                       </div>
                     </div>
@@ -592,7 +703,9 @@ function ElectionPageContent({ id }: { id: string }) {
                               key={address}
                               className="flex items-center justify-between p-3 bg-blue-50 rounded-lg"
                             >
-                              <span className="font-mono text-sm">{address}</span>
+                              <span className="font-mono text-sm">
+                                {address}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -617,7 +730,7 @@ function ElectionPageContent({ id }: { id: string }) {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-600">
-                    {election.endTime * 1000 < Date.now() 
+                    {election.endTime * 1000 < Date.now()
                       ? "This election has ended. You can view the results above."
                       : "This election has not started yet."}
                   </p>
@@ -642,13 +755,19 @@ function ElectionPageContent({ id }: { id: string }) {
                   <div key={result.id} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="font-medium">{result.name}</span>
-                      <span className="text-sm text-gray-500">{result.votes} votes</span>
+                      <span className="text-sm text-gray-500">
+                        {result.votes} votes
+                      </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div
                         className="bg-blue-600 h-2.5 rounded-full"
                         style={{
-                          width: `${(result.votes / Math.max(...results.map(r => r.votes), 1)) * 100}%`
+                          width: `${
+                            (result.votes /
+                              Math.max(...results.map((r) => r.votes), 1)) *
+                            100
+                          }%`,
                         }}
                       ></div>
                     </div>
@@ -657,18 +776,19 @@ function ElectionPageContent({ id }: { id: string }) {
               ) : (
                 <div className="text-center space-y-2">
                   <p className="text-gray-500">
-                    {election && election.endTime * 1000 > Date.now() 
+                    {election && election.endTime * 1000 > Date.now()
                       ? "Results will be available after the election ends"
                       : "No votes have been cast yet"}
                   </p>
                   {election && election.endTime * 1000 <= Date.now() && (
                     <p className="text-sm text-gray-400">
-                      Election ended on {new Date(election.endTime * 1000).toLocaleString()}
+                      Election ended on{" "}
+                      {new Date(election.endTime * 1000).toLocaleString()}
                     </p>
                   )}
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => fetchElectionResults()}
                     className="mt-2"
                   >
@@ -681,10 +801,15 @@ function ElectionPageContent({ id }: { id: string }) {
         </Card>
 
         {/* Add Candidate Info Dialog */}
-        <Dialog open={!!selectedCandidateInfo} onOpenChange={() => setSelectedCandidateInfo(null)}>
+        <Dialog
+          open={!!selectedCandidateInfo}
+          onOpenChange={() => setSelectedCandidateInfo(null)}
+        >
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold">{selectedCandidateInfo?.name}</DialogTitle>
+              <DialogTitle className="text-xl font-bold">
+                {selectedCandidateInfo?.name}
+              </DialogTitle>
             </DialogHeader>
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Candidate Information:</h4>
@@ -698,9 +823,12 @@ function ElectionPageContent({ id }: { id: string }) {
     </div>
   );
 }
-
 // Main component that handles params
-export default function ElectionPage({ params }: { params: Promise<{ id: string }> }) {
+export default function ElectionPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   return <ElectionPageContent id={id} />;
 }

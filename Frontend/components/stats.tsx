@@ -1,5 +1,12 @@
 export function Stats() {
-  const stats = [
+  type StatColor = keyof typeof colorVariants;
+  const stats: {
+    id: number;
+    name: string;
+    value: string;
+    color: StatColor;
+    icon: string;
+  }[] = [
     {
       id: 1,
       name: "Elections Created",

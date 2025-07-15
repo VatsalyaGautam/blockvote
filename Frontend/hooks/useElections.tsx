@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useEthers } from '@/lib/EthersProvider';
+import { useState, useEffect } from "react";
+import { useEthers } from "@/lib/EthersProvider";
+import { BigNumber } from "ethers";
 
 interface Candidate {
   id: number;
@@ -31,24 +32,27 @@ export function useElections() {
   useEffect(() => {
     const fetchElections = async () => {
       if (!contract) {
-        console.log('No contract available');
+        console.log("No contract available");
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
+
         // Get total number of elections
-        const totalElections = await contract.electionCount();
-        console.log('Total elections:', totalElections.toString());
-        
+        const totalElections: BigNumber = await contract.electionCount();
+        console.log("Total elections:", totalElections.toString());
+
         const electionsArray: Election[] = [];
 
         // Fetch each election
-        for (let i = 1; i <= totalElections; i++) {
-          console.log('Fetching election:', i);
+        for (let i = 1; i <= totalElections.toNumber(); i++) {
+          console.log("Fetching election:", i);
+
           const election = await contract.getElection(i);
-          console.log('Raw election data:', {
+
+          console.log("Raw election data:", {
             id: election[0].toString(),
             title: election[1],
             description: election[2],
@@ -56,24 +60,26 @@ export function useElections() {
             endTime: election[4].toString(),
             active: election[5],
             candidateCount: election[6].toString(),
-            creator: election[7]
+            creator: election[7],
           });
-          
-          const [ids, names, voteCounts] = await contract.getElectionResults(i);
-          console.log('Election results:', { 
-            ids: ids.map(id => id.toString()),
+
+          const [ids, names, voteCounts]: [BigNumber[], string[], BigNumber[]] =
+            await contract.getElectionResults(i);
+
+          console.log("Election results:", {
+            ids: ids.map((id) => id.toString()),
             names,
-            voteCounts: voteCounts.map(vc => vc.toString())
+            voteCounts: voteCounts.map((vc) => vc.toString()),
           });
-          
-          const candidates: Candidate[] = ids.map((id: number, index: number) => ({
+
+          const candidates: Candidate[] = ids.map((id, index) => ({
             id: id.toNumber(),
             name: names[index],
             info: "", // You might want to fetch this separately if needed
-            voteCount: voteCounts[index].toNumber()
+            voteCount: voteCounts[index].toNumber(),
           }));
 
-          const electionData = {
+          const electionData: Election = {
             id: election[0].toNumber(),
             title: election[1],
             description: election[2],
@@ -82,36 +88,47 @@ export function useElections() {
             active: election[5],
             candidateCount: election[6].toNumber(),
             creator: election[7],
-            candidates
+            candidates,
           };
 
-          console.log('Processed election data:', {
+          console.log("Processed election data:", {
             ...electionData,
-            startTimeFormatted: new Date(electionData.startTime * 1000).toLocaleString(),
-            endTimeFormatted: new Date(electionData.endTime * 1000).toLocaleString(),
+            startTimeFormatted: new Date(
+              electionData.startTime * 1000
+            ).toLocaleString(),
+            endTimeFormatted: new Date(
+              electionData.endTime * 1000
+            ).toLocaleString(),
             now: new Date().toLocaleString(),
-            isActive: electionData.active && 
-                     electionData.startTime <= Math.floor(Date.now() / 1000) && 
-                     electionData.endTime > Math.floor(Date.now() / 1000)
+            isActive:
+              electionData.active &&
+              electionData.startTime <= Math.floor(Date.now() / 1000) &&
+              electionData.endTime > Math.floor(Date.now() / 1000),
           });
-          
+
           electionsArray.push(electionData);
         }
 
-        console.log('All elections:', electionsArray.map(e => ({
-          ...e,
-          startTimeFormatted: new Date(e.startTime * 1000).toLocaleString(),
-          endTimeFormatted: new Date(e.endTime * 1000).toLocaleString(),
-          now: new Date().toLocaleString(),
-          isActive: e.active && 
-                   e.startTime <= Math.floor(Date.now() / 1000) && 
-                   e.endTime > Math.floor(Date.now() / 1000)
-        })));
-        
+        console.log(
+          "All elections:",
+          electionsArray.map((e) => ({
+            ...e,
+            startTimeFormatted: new Date(e.startTime * 1000).toLocaleString(),
+            endTimeFormatted: new Date(e.endTime * 1000).toLocaleString(),
+            now: new Date().toLocaleString(),
+            isActive:
+              e.active &&
+              e.startTime <= Math.floor(Date.now() / 1000) &&
+              e.endTime > Math.floor(Date.now() / 1000),
+          }))
+        );
+
         setElections(electionsArray);
       } catch (err) {
-        console.error('Error fetching elections:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch elections');
+        console.error("Error fetching elections:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch elections"
+        );
       } finally {
         setLoading(false);
       }
@@ -121,4 +138,4 @@ export function useElections() {
   }, [contract]);
 
   return { elections, loading, error };
-} 
+}
