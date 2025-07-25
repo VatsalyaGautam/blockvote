@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 /**
  * @title VotingDApp
- * @dev Smart contract for managing decentralized voting on Conflux eSpace Testnet
+ * @dev Smart contract for managing decentralized voting on Sepolia Testnet
  */
 contract VotingDApp {
     // Contract owner
