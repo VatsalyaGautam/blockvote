@@ -26,7 +26,7 @@ export function Hero() {
           <p className="mt-6 text-lg leading-8 text-blue-200">
             Create and participate in decentralized elections with complete
             transparency, immutable records, and cryptographic security. Built
-            on Conflux eSpace for fast, low-cost transactions.
+            on Sepolia for fast, low-cost transactions.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Link href="/elections">

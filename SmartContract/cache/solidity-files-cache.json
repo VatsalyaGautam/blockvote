@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/vatsalyagautam/Downloads/ElectionVotingDapp-CFX-main/SmartContract/contracts/ElectionVoting.sol": {
-      "lastModificationDate": 1752512970433,
-      "contentHash": "52604edaaa5a2a7fb2e614dc2a1d23dc",
+      "lastModificationDate": 1753466811925,
+      "contentHash": "9d8862369b43f7d034085103cf0d98cd",
       "sourceName": "contracts/ElectionVoting.sol",
       "solcConfig": {
         "version": "0.8.10",
